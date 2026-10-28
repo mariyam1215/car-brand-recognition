@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car Brand Recognition</title>
+<meta name="description" content="Deep-learning model that recognises the brand of a car from a photo. {{N_BRANDS}} brands, {{TOP1}} test accuracy. Runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f64b8'/%3E%3Cpath d='M6 20l2-6c.4-1 1.2-1.6 2.3-1.6h11.4c1 0 1.9.6 2.3 1.6l2 6v4h-3v-2H9v2H6z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <span class="brand">Car Brand Recognition</span>
+  <nav><a href="#demo">Demo</a><a href="#dataset">Dataset &amp; code</a><a href="#model">Model</a><a href="#results">Results</a><a href="#links">Project links</a></nav>
+</div></header>
+
+<main class="wrap">
+<section id="top">
+  <h1>Which brand made this car?</h1>
+  <p class="lead">A deep-learning model that looks at a photo and names the car's brand, from {{N_BRANDS}} makes such as Audi, BMW, Ferrari, Toyota and Tesla. Deep Learning semester project.</p>
+  <div class="stats">
+    <div class="stat"><b>{{TOP1}}</b><span>top-1 accuracy on {{N_TEST}} unseen test photos</span></div>
+    <div class="stat"><b>{{TOP3}}</b><span>top-3 accuracy</span></div>
+    <div class="stat"><b>{{F1}}</b><span>macro F1 (all brands weigh equally)</span></div>
+    <div class="stat"><b>{{N_BRANDS}}</b><span>car brands recognised</span></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>Try it</h2>
+  <p class="sub">Upload a photo of a car, or tap an example. The model runs inside your browser (ONNX Runtime Web), so the image never leaves your device.</p>
+  <div class="card demo">
+    <div>
+      <div id="drop" class="drop">
+        <p style="margin:0 0 12px">Drop a car photo here</p>
+        <label><input id="file" type="file" accept="image/*"><span class="btn">Choose a photo</span></label>
+      </div>
+      <p class="sub" style="margin:14px 0 6px;font-size:14px">Or try an example from the test set:</p>
+      <div class="samples">{{SAMPLE_BUTTONS}}</div>
+      <p id="status" role="status" aria-live="polite">Loading model…</p>
+    </div>
+    <div id="out" aria-live="polite">
+      <div id="placeholder-out" class="placeholder">Your prediction will appear here.</div>
+      <div id="result" hidden>
+        <div id="preview-wrap"><img id="preview" alt="Uploaded car photo"></div>
+        <div id="verdict"></div>
+        <div id="hint"></div>
+        <div id="bars"></div>
+      </div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:12px;font-size:14px">The model knows only the {{N_BRANDS}} brands listed below, and was trained on photos of mostly 2000-2012 model-year cars. Newer or rarer cars, and photos without a car, can give wrong answers.</p>
+</section>
+
+<section id="dataset">
+  <h2>Dataset &amp; code</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Dataset: Stanford Cars</h3>
+      <p>Secondary dataset (Krause et al., 3dRR 2013): {{N_IMAGES}} photos of cars labelled with make, model and year (196 classes). We keep only the <b>make</b>, which turns it into a {{N_BRANDS}}-brand recognition task.</p>
+      <table>
+        <tr><th>Split</th><th class="n">Images</th><th>Used for</th></tr>
+        <tr><td>Train</td><td class="n">{{N_TRAIN}}</td><td>learning</td></tr>
+        <tr><td>Validation</td><td class="n">{{N_VAL}}</td><td>10% of each brand's train images; picks the best epoch</td></tr>
+        <tr><td>Test</td><td class="n">{{N_TEST}}</td><td>official test split, never used in training</td></tr>
+      </table>
+      <p style="margin-bottom:0;font-size:14px">Source: <a href="https://ai.stanford.edu/~jkrause/cars/car_dataset.html">Stanford Cars dataset page</a>. Images are for non-commercial research use; they are not redistributed here, except a few examples.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Code</h3>
+      <p>Everything is open source in the <a data-gh="" href="{{GITHUB_URL}}">GitHub repository</a>, including the trained weights.</p>
+      <table>
+        <tr><td><a data-gh="src/prepare_data.py" href="{{GH:src/prepare_data.py}}"><code>src/prepare_data.py</code></a></td><td>labels to brands, caches images</td></tr>
+        <tr><td><a data-gh="src/train.py" href="{{GH:src/train.py}}"><code>src/train.py</code></a></td><td>transfer learning + fine-tuning</td></tr>
+        <tr><td><a data-gh="src/evaluate.py" href="{{GH:src/evaluate.py}}"><code>src/evaluate.py</code></a></td><td>test metrics and figures</td></tr>
+        <tr><td><a data-gh="src/export_onnx.py" href="{{GH:src/export_onnx.py}}"><code>src/export_onnx.py</code></a></td><td>Keras to ONNX</td></tr>
+        <tr><td><a data-gh="src/predict.py" href="{{GH:src/predict.py}}"><code>src/predict.py</code></a></td><td>command-line predictions</td></tr>
+        <tr><td><a data-gh="models/" href="{{GH:models/}}"><code>models/</code></a></td><td>trained weights (<code>.keras</code>, <code>.onnx</code>)</td></tr>
+      </table>
+    </div>
+  </div>
+  <h3>The {{N_BRANDS}} brands (images in the dataset)</h3>
+  <div class="chips">{{BRAND_CHIPS}}</div>
+</section>
+
+<section id="model">
+  <h2>Model</h2>
+  <p class="sub">Transfer learning: an EfficientNetV2-B0 network pre-trained on ImageNet already knows edges, shapes and textures. We teach it to tell car brands apart in two stages.</p>
+  <div class="flow">
+    <div><b>Photo</b><span>squashed to 224 &times; 224 RGB</span></div>
+    <div><b>EfficientNetV2-B0</b><span>ImageNet weights, 5.9M parameters</span></div>
+    <div><b>Global average pool</b><span>1280 features</span></div>
+    <div><b>Dropout 0.3 + Dense</b><span>softmax over {{N_BRANDS}} brands</span></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3 style="margin-top:0">Stage 1: linear probe</h3>
+      <p style="margin:0">Backbone frozen, only the final layer is trained on its features. Quick baseline: <b>{{PROBE_TOP1}}</b> test accuracy.</p></div>
+    <div class="card"><h3 style="margin-top:0">Stage 2: fine-tuning</h3>
+      <p style="margin:0">Upper blocks unfrozen ({{TRAINABLE}} layers) and trained for {{EPOCHS}} epochs with augmentation. Final: <b>{{TOP1}}</b>.</p></div>
+  </div>
+  <h3>Training details</h3>
+  <table>
+    <tr><td>Optimiser</td><td>AdamW, weight decay 1e-4, peak learning rate 2e-4, 1 warm-up epoch then cosine decay</td></tr>
+    <tr><td>Loss</td><td>Cross-entropy with label smoothing 0.1; class weights &prop; (median count / count)<sup>0.5</sup> to soften imbalance</td></tr>
+    <tr><td>Augmentation</td><td>horizontal flip, rotation &plusmn;4%, shift 8%, zoom, brightness, contrast</td></tr>
+    <tr><td>Batch size / epochs</td><td>32 / {{EPOCHS}} (best epoch chosen on validation accuracy)</td></tr>
+    <tr><td>Hardware</td><td>CPU only (4 cores)</td></tr>
+    <tr><td>Deployed model</td><td>ONNX, {{ONNX_MB}} MB, takes raw 0-255 pixels, no extra preprocessing</td></tr>
+  </table>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <p class="sub">All numbers are on the {{N_TEST}} official test photos, which the model never saw in training.</p>
+  <div class="stats">
+    <div class="stat"><b>{{TOP1}}</b><span>top-1 accuracy (fine-tuned)</span></div>
+    <div class="stat"><b>{{PROBE_TOP1}}</b><span>top-1, linear probe baseline</span></div>
+    <div class="stat"><b>{{TOP3}}</b><span>top-3 accuracy</span></div>
+    <div class="stat"><b>{{F1}}</b><span>macro F1</span></div>
+  </div>
+  <div class="grid2" style="margin-top:20px">
+    <figure><img src="img/training_curves.png" alt="Training and validation loss and accuracy per epoch" loading="lazy"><figcaption>Training curves.</figcaption></figure>
+    <figure><img src="img/sample_predictions.png" alt="Grid of random test images with predicted and true brands" loading="lazy"><figcaption>Random test photos: prediction, confidence and true brand.</figcaption></figure>
+  </div>
+  <div class="grid2">
+    <figure><img src="img/per_brand_f1.png" alt="Bar chart of F1 score for each brand" loading="lazy"><figcaption>F1 score per brand. Best: {{BEST_BRANDS}}. Weakest: {{WORST_BRANDS}}.</figcaption></figure>
+    <figure><img src="img/confusion_matrix.png" alt="Confusion matrix of true versus predicted brand" loading="lazy"><figcaption>Confusion matrix. Bright cells off the diagonal are brands the model mixes up.</figcaption></figure>
+  </div>
+  <h3>Most common mix-ups</h3>
+  <div class="table-scroll"><table>
+    <tr><th>True brand</th><th>Predicted as</th><th class="n">Photos</th></tr>
+    {{CONFUSION_ROWS}}
+  </table></div>
+  <h3>Per-brand scores</h3>
+  <div class="table-scroll"><table>
+    <tr><th>Brand</th><th class="n">Train images</th><th class="n">Test images</th><th class="n">Precision</th><th class="n">Recall</th><th class="n">F1</th></tr>
+    {{BRAND_TABLE}}
+  </table></div>
+  <h3>Limitations</h3>
+  <ul>
+    <li>Brand-level labels come from the make of 196 specific models; several brands are represented by a single model (for example Tesla Model S 2012), so other models of that brand may be missed.</li>
+    <li>Most photos show cars from 2000-2012. New designs and heavy modifications are out of distribution.</li>
+    <li>The model has no "not a car" or "unknown brand" class; it always names one of the {{N_BRANDS}} brands, so low confidence is the signal to distrust it.</li>
+  </ul>
+</section>
+
+<section id="links">
+  <h2>Project links</h2>
+  <div class="links"><!--LINKS-->{{LINKS}}<!--/LINKS--></div>
+</section>
+</main>
+
+<footer><div class="wrap">Deep Learning semester project &middot; model trained on the Stanford Cars dataset &middot; inference by <a href="https://onnxruntime.ai/">ONNX Runtime Web</a> (MIT).</div></footer>
+
+<script src="vendor/ort/ort.wasm.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

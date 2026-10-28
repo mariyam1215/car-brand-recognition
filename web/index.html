@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car Brand Recognition</title>
+<meta name="description" content="Deep-learning model that recognises the brand of a car from a photo. 49 brands, 86.8% test accuracy. Runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f64b8'/%3E%3Cpath d='M6 20l2-6c.4-1 1.2-1.6 2.3-1.6h11.4c1 0 1.9.6 2.3 1.6l2 6v4h-3v-2H9v2H6z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <span class="brand">Car Brand Recognition</span>
+  <nav><a href="#demo">Demo</a><a href="#dataset">Dataset &amp; code</a><a href="#model">Model</a><a href="#results">Results</a><a href="#links">Project links</a></nav>
+</div></header>
+
+<main class="wrap">
+<section id="top">
+  <h1>Which brand made this car?</h1>
+  <p class="lead">A deep-learning model that looks at a photo and names the car's brand, from 49 makes such as Audi, BMW, Ferrari, Toyota and Tesla. Deep Learning semester project.</p>
+  <div class="stats">
+    <div class="stat"><b>86.8%</b><span>top-1 accuracy on 8,041 unseen test photos</span></div>
+    <div class="stat"><b>95.8%</b><span>top-3 accuracy</span></div>
+    <div class="stat"><b>0.87</b><span>macro F1 (all brands weigh equally)</span></div>
+    <div class="stat"><b>49</b><span>car brands recognised</span></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>Try it</h2>
+  <p class="sub">Upload a photo of a car, or tap an example. The model runs inside your browser (ONNX Runtime Web), so the image never leaves your device.</p>
+  <div class="card demo">
+    <div>
+      <div id="drop" class="drop">
+        <p style="margin:0 0 12px">Drop a car photo here</p>
+        <label><input id="file" type="file" accept="image/*"><span class="btn">Choose a photo</span></label>
+      </div>
+      <p class="sub" style="margin:14px 0 6px;font-size:14px">Or try an example from the test set:</p>
+      <div class="samples"><button type="button" data-sample="samples/audi.jpg" aria-label="Example photo 1"><img src="samples/audi.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/bentley.jpg" aria-label="Example photo 2"><img src="samples/bentley.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/bmw.jpg" aria-label="Example photo 3"><img src="samples/bmw.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/ferrari.jpg" aria-label="Example photo 4"><img src="samples/ferrari.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/ford.jpg" aria-label="Example photo 5"><img src="samples/ford.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/honda.jpg" aria-label="Example photo 6"><img src="samples/honda.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/jeep.jpg" aria-label="Example photo 7"><img src="samples/jeep.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/lamborghini.jpg" aria-label="Example photo 8"><img src="samples/lamborghini.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/mercedes-benz.jpg" aria-label="Example photo 9"><img src="samples/mercedes-benz.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/porsche.jpg" aria-label="Example photo 10"><img src="samples/porsche.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/tesla.jpg" aria-label="Example photo 11"><img src="samples/tesla.jpg" alt="" loading="lazy"></button><button type="button" data-sample="samples/toyota.jpg" aria-label="Example photo 12"><img src="samples/toyota.jpg" alt="" loading="lazy"></button></div>
+      <p id="status" role="status" aria-live="polite">Loading model…</p>
+    </div>
+    <div id="out" aria-live="polite">
+      <div id="placeholder-out" class="placeholder">Your prediction will appear here.</div>
+      <div id="result" hidden>
+        <div id="preview-wrap"><img id="preview" alt="Uploaded car photo"></div>
+        <div id="verdict"></div>
+        <div id="hint"></div>
+        <div id="bars"></div>
+      </div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:12px;font-size:14px">The model knows only the 49 brands listed below, and was trained on photos of mostly 2000-2012 model-year cars. Newer or rarer cars, and photos without a car, can give wrong answers.</p>
+</section>
+
+<section id="dataset">
+  <h2>Dataset &amp; code</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Dataset: Stanford Cars</h3>
+      <p>Secondary dataset (Krause et al., 3dRR 2013): 16,185 photos of cars labelled with make, model and year (196 classes). We keep only the <b>make</b>, which turns it into a 49-brand recognition task.</p>
+      <table>
+        <tr><th>Split</th><th class="n">Images</th><th>Used for</th></tr>
+        <tr><td>Train</td><td class="n">7,331</td><td>learning</td></tr>
+        <tr><td>Validation</td><td class="n">813</td><td>10% of each brand's train images; picks the best epoch</td></tr>
+        <tr><td>Test</td><td class="n">8,041</td><td>official test split, never used in training</td></tr>
+      </table>
+      <p style="margin-bottom:0;font-size:14px">Source: <a href="https://ai.stanford.edu/~jkrause/cars/car_dataset.html">Stanford Cars dataset page</a>. Images are for non-commercial research use; they are not redistributed here, except a few examples.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Code</h3>
+      <p>Everything is open source in the <a data-gh="" href="#links">GitHub repository</a>, including the trained weights.</p>
+      <table>
+        <tr><td><a data-gh="src/prepare_data.py" href="#links"><code>src/prepare_data.py</code></a></td><td>labels to brands, caches images</td></tr>
+        <tr><td><a data-gh="src/train.py" href="#links"><code>src/train.py</code></a></td><td>transfer learning + fine-tuning</td></tr>
+        <tr><td><a data-gh="src/evaluate.py" href="#links"><code>src/evaluate.py</code></a></td><td>test metrics and figures</td></tr>
+        <tr><td><a data-gh="src/export_onnx.py" href="#links"><code>src/export_onnx.py</code></a></td><td>Keras to ONNX</td></tr>
+        <tr><td><a data-gh="src/predict.py" href="#links"><code>src/predict.py</code></a></td><td>command-line predictions</td></tr>
+        <tr><td><a data-gh="models/" href="#links"><code>models/</code></a></td><td>trained weights (<code>.keras</code>, <code>.onnx</code>)</td></tr>
+      </table>
+    </div>
+  </div>
+  <h3>The 49 brands (images in the dataset)</h3>
+  <div class="chips"><span class="chip">Chevrolet <small>1799</small></span><span class="chip">Dodge <small>1253</small></span><span class="chip">Audi <small>1169</small></span><span class="chip">BMW <small>1055</small></span><span class="chip">Ford <small>1035</small></span><span class="chip">Hyundai <small>871</small></span><span class="chip">Mercedes-Benz <small>518</small></span><span class="chip">Chrysler <small>516</small></span><span class="chip">Acura <small>482</small></span><span class="chip">GMC <small>473</small></span><span class="chip">Bentley <small>472</small></span><span class="chip">Jeep <small>438</small></span><span class="chip">Nissan <small>341</small></span><span class="chip">Suzuki <small>333</small></span><span class="chip">Toyota <small>332</small></span><span class="chip">Ferrari <small>326</small></span><span class="chip">Honda <small>321</small></span><span class="chip">Lamborghini <small>319</small></span><span class="chip">Aston Martin <small>314</small></span><span class="chip">Buick <small>314</small></span><span class="chip">Volkswagen <small>263</small></span><span class="chip">Volvo <small>260</small></span><span class="chip">Cadillac <small>257</small></span><span class="chip">Rolls-Royce <small>226</small></span><span class="chip">Spyker <small>175</small></span><span class="chip">Land Rover <small>170</small></span><span class="chip">HUMMER <small>165</small></span><span class="chip">Bugatti <small>152</small></span><span class="chip">Infiniti <small>133</small></span><span class="chip">FIAT <small>122</small></span><span class="chip">Mitsubishi <small>95</small></span><span class="chip">Jaguar <small>93</small></span><span class="chip">Eagle <small>92</small></span><span class="chip">Daewoo <small>90</small></span><span class="chip">AM General <small>89</small></span><span class="chip">Geo <small>89</small></span><span class="chip">McLaren <small>88</small></span><span class="chip">Plymouth <small>88</small></span><span class="chip">Fisker <small>87</small></span><span class="chip">Porsche <small>87</small></span><span class="chip">Scion <small>83</small></span><span class="chip">Ram <small>82</small></span><span class="chip">Isuzu <small>80</small></span><span class="chip">smart <small>80</small></span><span class="chip">Lincoln <small>78</small></span><span class="chip">Tesla <small>77</small></span><span class="chip">MINI <small>73</small></span><span class="chip">Mazda <small>72</small></span><span class="chip">Maybach <small>58</small></span></div>
+</section>
+
+<section id="model">
+  <h2>Model</h2>
+  <p class="sub">Transfer learning: an EfficientNetV2-B0 network pre-trained on ImageNet already knows edges, shapes and textures. We teach it to tell car brands apart in two stages.</p>
+  <div class="flow">
+    <div><b>Photo</b><span>squashed to 224 &times; 224 RGB</span></div>
+    <div><b>EfficientNetV2-B0</b><span>ImageNet weights, 5.9M parameters</span></div>
+    <div><b>Global average pool</b><span>1280 features</span></div>
+    <div><b>Dropout 0.3 + Dense</b><span>softmax over 49 brands</span></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3 style="margin-top:0">Stage 1: linear probe</h3>
+      <p style="margin:0">Backbone frozen, only the final layer is trained on its features. Quick baseline: <b>60.4%</b> test accuracy.</p></div>
+    <div class="card"><h3 style="margin-top:0">Stage 2: fine-tuning</h3>
+      <p style="margin:0">Upper blocks unfrozen (189 layers) and trained for 12 epochs with augmentation. Final: <b>86.8%</b>.</p></div>
+  </div>
+  <h3>Training details</h3>
+  <table>
+    <tr><td>Optimiser</td><td>AdamW, weight decay 1e-4, peak learning rate 2e-4, 1 warm-up epoch then cosine decay</td></tr>
+    <tr><td>Loss</td><td>Cross-entropy with label smoothing 0.1; class weights &prop; (median count / count)<sup>0.5</sup> to soften imbalance</td></tr>
+    <tr><td>Augmentation</td><td>horizontal flip, rotation &plusmn;4%, shift 8%, zoom, brightness, contrast</td></tr>
+    <tr><td>Batch size / epochs</td><td>32 / 12 (best epoch chosen on validation accuracy)</td></tr>
+    <tr><td>Hardware</td><td>CPU only (4 cores)</td></tr>
+    <tr><td>Deployed model</td><td>ONNX, 24 MB, takes raw 0-255 pixels, no extra preprocessing</td></tr>
+  </table>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <p class="sub">All numbers are on the 8,041 official test photos, which the model never saw in training.</p>
+  <div class="stats">
+    <div class="stat"><b>86.8%</b><span>top-1 accuracy (fine-tuned)</span></div>
+    <div class="stat"><b>60.4%</b><span>top-1, linear probe baseline</span></div>
+    <div class="stat"><b>95.8%</b><span>top-3 accuracy</span></div>
+    <div class="stat"><b>0.87</b><span>macro F1</span></div>
+  </div>
+  <div class="grid2" style="margin-top:20px">
+    <figure><img src="img/training_curves.png" alt="Training and validation loss and accuracy per epoch" loading="lazy"><figcaption>Training curves.</figcaption></figure>
+    <figure><img src="img/sample_predictions.png" alt="Grid of random test images with predicted and true brands" loading="lazy"><figcaption>Random test photos: prediction, confidence and true brand.</figcaption></figure>
+  </div>
+  <div class="grid2">
+    <figure><img src="img/per_brand_f1.png" alt="Bar chart of F1 score for each brand" loading="lazy"><figcaption>F1 score per brand. Best: MINI, Geo, HUMMER. Weakest: Eagle, Porsche, Mitsubishi.</figcaption></figure>
+    <figure><img src="img/confusion_matrix.png" alt="Confusion matrix of true versus predicted brand" loading="lazy"><figcaption>Confusion matrix. Bright cells off the diagonal are brands the model mixes up.</figcaption></figure>
+  </div>
+  <h3>Most common mix-ups</h3>
+  <div class="table-scroll"><table>
+    <tr><th>True brand</th><th>Predicted as</th><th class="n">Photos</th></tr>
+    <tr><td>Chevrolet</td><td>GMC</td><td class="n">31</td></tr>
+<tr><td>Chevrolet</td><td>Dodge</td><td class="n">22</td></tr>
+<tr><td>Ford</td><td>Dodge</td><td class="n">20</td></tr>
+<tr><td>Chevrolet</td><td>Hyundai</td><td class="n">18</td></tr>
+<tr><td>Dodge</td><td>Mercedes-Benz</td><td class="n">18</td></tr>
+<tr><td>GMC</td><td>Chevrolet</td><td class="n">17</td></tr>
+<tr><td>Ford</td><td>Hyundai</td><td class="n">15</td></tr>
+<tr><td>Toyota</td><td>Hyundai</td><td class="n">14</td></tr>
+<tr><td>Nissan</td><td>Hyundai</td><td class="n">13</td></tr>
+<tr><td>Chevrolet</td><td>Ford</td><td class="n">12</td></tr>
+  </table></div>
+  <h3>Per-brand scores</h3>
+  <div class="table-scroll"><table>
+    <tr><th>Brand</th><th class="n">Train images</th><th class="n">Test images</th><th class="n">Precision</th><th class="n">Recall</th><th class="n">F1</th></tr>
+    <tr><td>MINI</td><td class="n">37</td><td class="n">36</td><td class="n">0.92</td><td class="n">1.00</td><td class="n">0.96</td></tr>
+<tr><td>Geo</td><td class="n">45</td><td class="n">44</td><td class="n">1.00</td><td class="n">0.91</td><td class="n">0.95</td></tr>
+<tr><td>HUMMER</td><td class="n">83</td><td class="n">82</td><td class="n">0.96</td><td class="n">0.93</td><td class="n">0.94</td></tr>
+<tr><td>Isuzu</td><td class="n">40</td><td class="n">40</td><td class="n">0.97</td><td class="n">0.90</td><td class="n">0.94</td></tr>
+<tr><td>Maybach</td><td class="n">29</td><td class="n">29</td><td class="n">0.93</td><td class="n">0.93</td><td class="n">0.93</td></tr>
+<tr><td>smart</td><td class="n">40</td><td class="n">40</td><td class="n">0.95</td><td class="n">0.90</td><td class="n">0.92</td></tr>
+<tr><td>Bentley</td><td class="n">238</td><td class="n">234</td><td class="n">0.87</td><td class="n">0.98</td><td class="n">0.92</td></tr>
+<tr><td>AM General</td><td class="n">45</td><td class="n">44</td><td class="n">0.91</td><td class="n">0.93</td><td class="n">0.92</td></tr>
+<tr><td>McLaren</td><td class="n">44</td><td class="n">44</td><td class="n">0.91</td><td class="n">0.93</td><td class="n">0.92</td></tr>
+<tr><td>Ferrari</td><td class="n">164</td><td class="n">162</td><td class="n">0.94</td><td class="n">0.90</td><td class="n">0.92</td></tr>
+<tr><td>Jeep</td><td class="n">220</td><td class="n">218</td><td class="n">0.90</td><td class="n">0.94</td><td class="n">0.92</td></tr>
+<tr><td>Infiniti</td><td class="n">67</td><td class="n">66</td><td class="n">0.94</td><td class="n">0.89</td><td class="n">0.91</td></tr>
+<tr><td>Lamborghini</td><td class="n">161</td><td class="n">158</td><td class="n">0.95</td><td class="n">0.88</td><td class="n">0.91</td></tr>
+<tr><td>Audi</td><td class="n">589</td><td class="n">580</td><td class="n">0.91</td><td class="n">0.92</td><td class="n">0.91</td></tr>
+<tr><td>Rolls-Royce</td><td class="n">114</td><td class="n">112</td><td class="n">0.94</td><td class="n">0.88</td><td class="n">0.91</td></tr>
+<tr><td>Cadillac</td><td class="n">129</td><td class="n">128</td><td class="n">0.89</td><td class="n">0.93</td><td class="n">0.91</td></tr>
+<tr><td>Land Rover</td><td class="n">86</td><td class="n">84</td><td class="n">0.92</td><td class="n">0.90</td><td class="n">0.91</td></tr>
+<tr><td>Tesla</td><td class="n">39</td><td class="n">38</td><td class="n">0.90</td><td class="n">0.92</td><td class="n">0.91</td></tr>
+<tr><td>Lincoln</td><td class="n">39</td><td class="n">39</td><td class="n">1.00</td><td class="n">0.82</td><td class="n">0.90</td></tr>
+<tr><td>Mazda</td><td class="n">36</td><td class="n">36</td><td class="n">0.91</td><td class="n">0.89</td><td class="n">0.90</td></tr>
+<tr><td>BMW</td><td class="n">531</td><td class="n">524</td><td class="n">0.89</td><td class="n">0.90</td><td class="n">0.90</td></tr>
+<tr><td>Spyker</td><td class="n">88</td><td class="n">87</td><td class="n">0.89</td><td class="n">0.90</td><td class="n">0.89</td></tr>
+<tr><td>Fisker</td><td class="n">44</td><td class="n">43</td><td class="n">0.88</td><td class="n">0.88</td><td class="n">0.88</td></tr>
+<tr><td>Dodge</td><td class="n">630</td><td class="n">623</td><td class="n">0.85</td><td class="n">0.91</td><td class="n">0.88</td></tr>
+<tr><td>Bugatti</td><td class="n">77</td><td class="n">75</td><td class="n">0.86</td><td class="n">0.89</td><td class="n">0.88</td></tr>
+<tr><td>Nissan</td><td class="n">171</td><td class="n">170</td><td class="n">0.96</td><td class="n">0.79</td><td class="n">0.86</td></tr>
+<tr><td>FIAT</td><td class="n">62</td><td class="n">60</td><td class="n">0.84</td><td class="n">0.88</td><td class="n">0.86</td></tr>
+<tr><td>Plymouth</td><td class="n">44</td><td class="n">44</td><td class="n">0.88</td><td class="n">0.84</td><td class="n">0.86</td></tr>
+<tr><td>Daewoo</td><td class="n">45</td><td class="n">45</td><td class="n">0.92</td><td class="n">0.80</td><td class="n">0.86</td></tr>
+<tr><td>Chrysler</td><td class="n">260</td><td class="n">256</td><td class="n">0.86</td><td class="n">0.85</td><td class="n">0.86</td></tr>
+<tr><td>Chevrolet</td><td class="n">905</td><td class="n">894</td><td class="n">0.90</td><td class="n">0.81</td><td class="n">0.85</td></tr>
+<tr><td>Scion</td><td class="n">42</td><td class="n">41</td><td class="n">0.85</td><td class="n">0.85</td><td class="n">0.85</td></tr>
+<tr><td>Buick</td><td class="n">158</td><td class="n">156</td><td class="n">0.85</td><td class="n">0.85</td><td class="n">0.85</td></tr>
+<tr><td>Ford</td><td class="n">521</td><td class="n">514</td><td class="n">0.90</td><td class="n">0.80</td><td class="n">0.84</td></tr>
+<tr><td>Acura</td><td class="n">242</td><td class="n">240</td><td class="n">0.87</td><td class="n">0.82</td><td class="n">0.84</td></tr>
+<tr><td>Mercedes-Benz</td><td class="n">261</td><td class="n">257</td><td class="n">0.79</td><td class="n">0.89</td><td class="n">0.84</td></tr>
+<tr><td>Volkswagen</td><td class="n">132</td><td class="n">131</td><td class="n">0.82</td><td class="n">0.85</td><td class="n">0.84</td></tr>
+<tr><td>Volvo</td><td class="n">131</td><td class="n">129</td><td class="n">0.78</td><td class="n">0.89</td><td class="n">0.83</td></tr>
+<tr><td>GMC</td><td class="n">238</td><td class="n">235</td><td class="n">0.80</td><td class="n">0.86</td><td class="n">0.83</td></tr>
+<tr><td>Toyota</td><td class="n">168</td><td class="n">164</td><td class="n">0.93</td><td class="n">0.75</td><td class="n">0.83</td></tr>
+<tr><td>Honda</td><td class="n">161</td><td class="n">160</td><td class="n">0.76</td><td class="n">0.92</td><td class="n">0.83</td></tr>
+<tr><td>Aston Martin</td><td class="n">157</td><td class="n">157</td><td class="n">0.78</td><td class="n">0.87</td><td class="n">0.82</td></tr>
+<tr><td>Hyundai</td><td class="n">438</td><td class="n">433</td><td class="n">0.77</td><td class="n">0.88</td><td class="n">0.82</td></tr>
+<tr><td>Jaguar</td><td class="n">47</td><td class="n">46</td><td class="n">0.85</td><td class="n">0.74</td><td class="n">0.79</td></tr>
+<tr><td>Ram</td><td class="n">41</td><td class="n">41</td><td class="n">0.88</td><td class="n">0.71</td><td class="n">0.78</td></tr>
+<tr><td>Suzuki</td><td class="n">167</td><td class="n">166</td><td class="n">0.76</td><td class="n">0.79</td><td class="n">0.78</td></tr>
+<tr><td>Eagle</td><td class="n">46</td><td class="n">46</td><td class="n">0.89</td><td class="n">0.67</td><td class="n">0.77</td></tr>
+<tr><td>Porsche</td><td class="n">44</td><td class="n">43</td><td class="n">0.69</td><td class="n">0.84</td><td class="n">0.76</td></tr>
+<tr><td>Mitsubishi</td><td class="n">48</td><td class="n">47</td><td class="n">0.97</td><td class="n">0.62</td><td class="n">0.75</td></tr>
+  </table></div>
+  <h3>Limitations</h3>
+  <ul>
+    <li>Brand-level labels come from the make of 196 specific models; several brands are represented by a single model (for example Tesla Model S 2012), so other models of that brand may be missed.</li>
+    <li>Most photos show cars from 2000-2012. New designs and heavy modifications are out of distribution.</li>
+    <li>The model has no "not a car" or "unknown brand" class; it always names one of the 49 brands, so low confidence is the signal to distrust it.</li>
+  </ul>
+</section>
+
+<section id="links">
+  <h2>Project links</h2>
+  <div class="links"><!--LINKS-->
+<div class="off"><b>GitHub repository</b><span>source code, dataset link and model weights (link coming soon)</span></div>
+<div class="off"><b>Project report</b><span>problem, dataset, architecture, training and results (link coming soon)</span></div>
+<div class="off"><b>Presentation slides</b><span>PowerPoint / PDF of the project (link coming soon)</span></div>
+<div class="off"><b>YouTube video</b><span>voice-over walkthrough of the slides (link coming soon)</span></div>
+<div class="off"><b>LinkedIn post</b><span>project announcement (link coming soon)</span></div>
+<a href="https://ai.stanford.edu/~jkrause/cars/car_dataset.html"><b>Dataset: Stanford Cars</b><span>ai.stanford.edu/~jkrause/cars/car_dataset.html</span></a>
+<a href="model/car_brand.onnx"><b>Model weights (ONNX)</b><span>model/car_brand.onnx, also in the GitHub repo</span></a>
+<!--/LINKS--></div>
+</section>
+</main>
+
+<footer><div class="wrap">Deep Learning semester project &middot; model trained on the Stanford Cars dataset &middot; inference by <a href="https://onnxruntime.ai/">ONNX Runtime Web</a> (MIT).</div></footer>
+
+<script src="vendor/ort/ort.wasm.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

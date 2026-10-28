@@ -1,0 +1,4 @@
+# only what predict.py needs (no TensorFlow)
+numpy
+pillow
+onnxruntime

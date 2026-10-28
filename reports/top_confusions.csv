@@ -1,0 +1,16 @@
+true_brand,predicted_as,images
+Chevrolet,GMC,31
+Chevrolet,Dodge,22
+Ford,Dodge,20
+Chevrolet,Hyundai,18
+Dodge,Mercedes-Benz,18
+GMC,Chevrolet,17
+Ford,Hyundai,15
+Toyota,Hyundai,14
+Nissan,Hyundai,13
+Chevrolet,Ford,12
+Chevrolet,Suzuki,12
+Buick,Hyundai,11
+Dodge,Chevrolet,11
+Ford,Chevrolet,11
+Hyundai,Mercedes-Benz,10

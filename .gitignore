@@ -1,0 +1,7 @@
+data/cache/
+models/best.weights.h5
+__pycache__/
+*.pyc
+.venv/
+.vercel/
+.DS_Store

@@ -1,0 +1,10 @@
+# training / evaluation
+tensorflow>=2.18      # Keras 3 (CPU is enough; a GPU makes training much faster)
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+pillow
+onnx
+onnxruntime
